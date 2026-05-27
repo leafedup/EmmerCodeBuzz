@@ -1,3 +1,3 @@
 Code voor de beste slimme emmer ooit (echt)
 leaphy easy bloqs 👌
-shitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshitshit
+iets met light wanneer het donker is
