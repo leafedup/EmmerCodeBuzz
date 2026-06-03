@@ -1,0 +1,88 @@
+#include "FastLED.h"
+#include <Wire.h>
+#include <List.hpp>
+List<int> i2cChannelStack;
+
+#include <Adafruit_SSD1306.h>
+Adafruit_SSD1306 display(128, 32, &Wire, -1);
+
+#define NUM_LEDS 16
+CRGB ledstrip[NUM_LEDS];
+
+#define LEDSTRIP_SPEED 50
+
+void i2cSelectChannel(uint8_t channel, bool push = true) {
+    if (push) i2cChannelStack.addLast(channel);
+    if (channel <= 7) channel = (1 << channel);
+    Wire.beginTransmission(0x70);
+    Wire.write(channel);
+    Wire.endTransmission();
+}
+
+void i2cRestoreChannel() {
+    i2cChannelStack.removeLast();
+    uint8_t channel = i2cChannelStack.get(i2cChannelStack.getSize() - 1);
+    i2cSelectChannel(channel, false);
+}
+
+uint8_t i2cGetChannel() {
+    uint8_t channel = i2cChannelStack.get(i2cChannelStack.getSize() - 1);
+    if (channel > 7) channel = 0;
+    return channel;
+}
+
+bool oledSetup[8];
+void setupoled() {
+    uint8_t channel = i2cGetChannel();
+    if (!oledSetup[channel]) {
+      if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+        Serial.println(F("Contact with the display failed: Check the connections"));
+      }
+
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(0, 0);
+      display.println(F("Leaphy OLED"));
+      display.display();
+      oledSetup[channel] = true;
+    }
+}
+
+void leaphyProgram() {
+  while (true) {
+    concept();
+    console();
+  }
+}
+
+// Describe this function...
+// Describe this function...
+void console() {
+  Serial.println(analogRead(A0));
+  delay(3 * 1000);
+}
+// Describe this function...
+// Describe this function...
+void concept() {
+  if (analogRead(A0) < 20) {
+    fill_solid(ledstrip, NUM_LEDS, CRGB(0, 55, 255)); FastLED.show();
+  } else {
+    setupoled();
+    display.clearDisplay();
+    fill_solid(ledstrip, NUM_LEDS, CRGB(0, 0, 0)); FastLED.show();
+  }
+}
+
+void setup() {
+	Serial.begin(115200);
+  FastLED.addLeds<WS2812, 10, GRB>(ledstrip, NUM_LEDS);
+
+  Wire.begin();
+  Wire.setWireTimeout();
+  i2cSelectChannel(0xff);
+  leaphyProgram();
+}
+
+void loop() {
+}
